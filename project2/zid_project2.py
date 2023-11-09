@@ -22,7 +22,7 @@ import pandas as pd
 # Note: This module should be imported as cfg
 #
 # <COMPLETE THIS PART>
-
+import config as cfg
 
 
 # ---------------------------------------------------------------------------- 
@@ -330,6 +330,8 @@ def mk_aret_df(ret_df):
     
     """
     # <COMPLETE THIS PART>
+    result_df = (ret_df.sub(ret_df['mkt'], axis=0)).iloc[:, :-1]
+    return result_df
 
 
 
