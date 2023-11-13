@@ -21,14 +21,14 @@ import pandas as pd
 # package) is imported as "cfg"
 # Note: This module should be imported as cfg
 #
-# <COMPLETE THIS PART>
-
+import config as cfg
 
 
 # ---------------------------------------------------------------------------- 
 # Part 3: Complete the read_prc_csv function
 # ---------------------------------------------------------------------------- 
 def read_prc_csv(tic):
+
     """ This function creates a data frame with the contents of a CSV file 
     containing stock price information for a given ticker. 
     
@@ -186,7 +186,7 @@ def mk_prc_df(tickers, prc_col='adj_close'):
 
 
     """
-    # <COMPLETE THIS PART>
+
 
 
 
@@ -195,11 +195,13 @@ def mk_prc_df(tickers, prc_col='adj_close'):
 # Part 5: Complete the mk_ret_df function
 # ---------------------------------------------------------------------------- 
 def mk_ret_df(prc_df):
+
     """ Creates a data frame containing returns for both individuals stock AND 
     a proxy for the market portfolio, given a data frame with stock prices, `prc_df`. 
 
     This function will compute returns for each column of `prc_df` and also
     include the market returns in a column called "mkt".  
+    
 
     Market returns need to be obtained from the "mkt" column in the CSV file
     "ff_daily_csv". The location of this CSV file is given by the variable
@@ -261,8 +263,17 @@ def mk_ret_df(prc_df):
 
 
     """
-    # <COMPLETE THIS PART>
+    market_data = pd.read_csv(cfg.FF_CSV)
 
+    market_data['Date'] = pd.to_datetime(market_data['Date'])
+    market_data.set_index('Date', inplace=True)
+
+    returns_df = prc_df.sort_index().pct_change()
+
+    merged_df = pd.merge(returns_df, market_data['mkt'], how='left', left_index=True, right_index=True)
+    merged_df.index.name = 'Date'
+
+    return merged_df
 
 
 
@@ -948,7 +959,7 @@ if __name__ == "__main__":
     #_test_cfg()
     #_test_read_prc_csv()
     #_test_mk_prc_df()
-    #_test_mk_ret_df()
+    _test_mk_ret_df()
     #_test_mk_aret_df()
     #_test_get_avg()
     #_test_get_ew_rets()
