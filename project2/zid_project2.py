@@ -22,7 +22,7 @@ import pandas as pd
 # Note: This module should be imported as cfg
 #
 # <COMPLETE THIS PART>
-
+import config as cfg
 
 
 # ---------------------------------------------------------------------------- 
@@ -382,8 +382,10 @@ def get_avg(df, col, year):
         0.032
 
     """
-    #<COMPLETE THIS PART>
 
+    # Row indexing uses the year attribute of DateTimeIndex
+    # mean() ignores NaN values while obtaining the average
+    return df.loc[df.index.year == year, col].mean()
 
 
 def get_ew_rets(df, tickers):
@@ -427,7 +429,11 @@ def get_ew_rets(df, tickers):
 
 
     """
-    #<COMPLETE THIS PART>
+    # Selects columns based on tickers list
+    # For each date, takes an equally-weighted sum in the form of a mean
+    # Ignores NaN values by default, and does nothing when a given date may have all null values.
+    return df.loc[:, tickers].mean(axis=1)
+
 
 
 
@@ -473,8 +479,21 @@ def get_ann_ret(ser, start, end):
       computation of tot_ret
 
     """
-    # <COMPLETE THIS PART>
+    # Selects the rows based on the start and end.
+    stock_returns = ser.loc[start:end]
 
+    # Counts the number of non-null values for N.
+    # Invalidates when series is empty or is all non-null values
+    days = stock_returns.count()
+
+    if days == 0:
+        return 0
+
+    # Total return is calculated by first adding 1 to each row, and then following up with a total product of the rows.
+    # This process ignores NaN values entirely.
+    tot_ret = stock_returns.add(1).prod(skipna=True)
+
+    return tot_ret**(252/days) - 1
 
 # ----------------------------------------------------------------------------
 # Part 8: Answer the following questions
@@ -950,9 +969,9 @@ if __name__ == "__main__":
     #_test_mk_prc_df()
     #_test_mk_ret_df()
     #_test_mk_aret_df()
-    #_test_get_avg()
+    _test_get_avg()
     #_test_get_ew_rets()
-    #_test_get_ann_ret()
+    # _test_get_ann_ret()
 
 
 
