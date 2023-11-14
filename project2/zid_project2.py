@@ -23,7 +23,6 @@ import pandas as pd
 #
 # <COMPLETE THIS PART>
 import config as cfg
-from soup_group.project2.config import standardise_colnames
 
 
 # ---------------------------------------------------------------------------- 
@@ -98,7 +97,7 @@ def read_prc_csv(tic):
     df.set_index('Date', inplace=True)
 
     # Standardize column names using the provided function
-    df = standardise_colnames(df)
+    df = cfg.standardise_colnames(df)
     return df
 
 
