@@ -21,6 +21,7 @@ import pandas as pd
 # package) is imported as "cfg"
 # Note: This module should be imported as cfg
 #
+
 import config as cfg
 
 
@@ -84,6 +85,21 @@ def read_prc_csv(tic):
     """
     # <COMPLETE THIS PART>
 
+
+# Build the file name based on the ticker
+    filename = os.path.join(cfg.DATADIR, f"{tic.lower()}_prc.csv")
+
+
+    # Read the CSV file into a DataFrame
+    df = pd.read_csv(filename)
+
+    # Convert the 'Date' column to datetime format and set it as the index
+    df['Date'] = pd.to_datetime(df['Date'])
+    df.set_index('Date', inplace=True)
+
+    # Standardize column names using the provided function
+    df = cfg.standardise_colnames(df)
+    return df
 
 
 
@@ -955,8 +971,8 @@ def _test_get_ann_ret():
 
 
 if __name__ == "__main__":
-    pass
-    #_test_cfg()
+
+    _test_cfg()
     #_test_read_prc_csv()
     #_test_mk_prc_df()
     _test_mk_ret_df()
