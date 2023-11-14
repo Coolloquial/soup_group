@@ -972,10 +972,10 @@ def _test_get_ann_ret():
 
 if __name__ == "__main__":
 
-    _test_cfg()
+    #_test_cfg()
     #_test_read_prc_csv()
     #_test_mk_prc_df()
-    _test_mk_ret_df()
+    #_test_mk_ret_df()
     #_test_mk_aret_df()
     #_test_get_avg()
     #_test_get_ew_rets()
