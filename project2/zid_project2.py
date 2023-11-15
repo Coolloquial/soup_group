@@ -93,21 +93,24 @@ def read_prc_csv(tic):
 # Build the file name based on the ticker
     filename = os.path.join(cfg.DATADIR, f"{tic.lower()}_prc.csv")
 
-
     # Read the CSV file into a DataFrame
     df = pd.read_csv(filename)
 
     # Convert the 'Date' column to datetime format and set it as the index
     df['Date'] = pd.to_datetime(df['Date'])
+
     df.set_index('Date', inplace=True)
+
 
     # Standardize column names using the provided function
     df = cfg.standardise_colnames(df)
+
+
     return df
 
+read_prc_csv('pg')
 
-
-# ---------------------------------------------------------------------------- 
+# ----------------------------------------------------------------------------
 # Part 4: Complete the mk_prc_df function
 # ---------------------------------------------------------------------------- 
 def mk_prc_df(tickers, prc_col='adj_close'):
@@ -206,12 +209,26 @@ def mk_prc_df(tickers, prc_col='adj_close'):
 
 
     """
+    df = pd.DataFrame()
+    #set up an empty data frame that we will add information about each tickers price to
+    for ticker in tickers:
+        ticker_data = read_prc_csv(ticker)
+        #for each ticker, use read_prc_csv to obtain its data
+        ticker_price = ticker_data[prc_col]
+        #Choose which price column
+        df = pd.concat([df, ticker_price.rename(ticker)], axis=1)
+        #add the ticker's chosen price column to the dataframe under the tickers name
+        #print(df)
 
+    df = df.groupby(df.index).first()
+    #Index to date and reorders dates from earliest to latest
+    #print(df)
 
+    return df
 
-
-
-# ---------------------------------------------------------------------------- 
+#dummy_list = ('tsm','v','pfe')
+#mk_prc_df(dummy_list)
+# ----------------------------------------------------------------------------
 # Part 5: Complete the mk_ret_df function
 # ---------------------------------------------------------------------------- 
 def mk_ret_df(prc_df):
