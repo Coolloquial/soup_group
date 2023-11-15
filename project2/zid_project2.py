@@ -90,7 +90,7 @@ def read_prc_csv(tic):
     # <COMPLETE THIS PART>
 
 
-# Build the file name based on the ticker
+    # Build the file name based on the ticker
     filename = os.path.join(cfg.DATADIR, f"{tic.lower()}_prc.csv")
 
     # Read the CSV file into a DataFrame
@@ -101,14 +101,10 @@ def read_prc_csv(tic):
 
     df.set_index('Date', inplace=True)
 
-
     # Standardize column names using the provided function
     df = cfg.standardise_colnames(df)
 
-
     return df
-
-read_prc_csv('pg')
 
 # ----------------------------------------------------------------------------
 # Part 4: Complete the mk_prc_df function
@@ -209,25 +205,27 @@ def mk_prc_df(tickers, prc_col='adj_close'):
 
 
     """
+    # set up an empty data frame that we will add information about each tickers price to
     df = pd.DataFrame()
-    #set up an empty data frame that we will add information about each tickers price to
-    for ticker in tickers:
-        ticker_data = read_prc_csv(ticker)
-        #for each ticker, use read_prc_csv to obtain its data
-        ticker_price = ticker_data[prc_col]
-        #Choose which price column
-        df = pd.concat([df, ticker_price.rename(ticker)], axis=1)
-        #add the ticker's chosen price column to the dataframe under the tickers name
-        #print(df)
 
+    for ticker in tickers:
+        # for each ticker, use read_prc_csv to obtain its data
+        ticker_data = read_prc_csv(ticker)
+
+        # Choose which price column
+        ticker_price = ticker_data[prc_col]
+
+        # add the ticker's chosen price column to the dataframe under the tickers name
+        df = pd.concat([df, ticker_price.rename(ticker)], axis=1)
+
+    # Index to date and reorders dates from earliest to latest
     df = df.groupby(df.index).first()
-    #Index to date and reorders dates from earliest to latest
-    #print(df)
+    df.index.rename('Date', inplace=True)
+    df.columns = df.columns.str.lower()
 
     return df
 
-#dummy_list = ('tsm','v','pfe')
-#mk_prc_df(dummy_list)
+
 # ----------------------------------------------------------------------------
 # Part 5: Complete the mk_ret_df function
 # ---------------------------------------------------------------------------- 
@@ -378,6 +376,9 @@ def mk_aret_df(ret_df):
     
     """
     # <COMPLETE THIS PART>
+
+    # Subtracts market return from each stock return.
+    # iloc is used to include all columns except the last one 'mkt' in the dataframe
     result_df = (ret_df.sub(ret_df['mkt'], axis=0)).iloc[:, :-1]
     return result_df
 
@@ -578,23 +579,23 @@ def get_ann_ret(ser, start, end):
 #     year 2020 (ignoring missing values)? The sample should include all tickers
 #     included in the dictionary config.TICMAP. Your answer should include the
 #     ticker for this stock.
-Q1_ANSWER = '?'
+Q1_ANSWER = 'TSLA'
 
 
 # Q2: What is the annualised return for the EW portfolio of all your stocks in
 # the config.TICMAP dictionary from the beginning of 2010 to the end of 2020?
-Q2_ANSWER = '?'
+Q2_ANSWER = '0.20435428936872047'
 
 # Q3: What is the annualised daily return for the period from 2010 to 2020 for
 # the stock with the highest average return in 2020 (the one you identified in
 # the first question above)?
-Q3_ANSWER = '?'
+Q3_ANSWER = '0.5516209538619083'
 
 # Q4: What is the annualised daily ABNORMAL return for the period from 2010 to 2020 for
 # the stock with the highest average return in 2020 (the one you identified in
 # the first question Q1 above)? Abnormal returns are calculated by subtracting
 # the market return ("mkt") from the individual stock return.
-Q4_ANSWER = '?'
+Q4_ANSWER = '0.3770885290285164'
     
 
 
@@ -1018,12 +1019,10 @@ if __name__ == "__main__":
     #_test_read_prc_csv()
     #_test_mk_prc_df()
     #_test_mk_ret_df()
-    _test_mk_aret_df()
-    #_test_get_avg()
     #_test_mk_aret_df()
-    _test_get_avg()
+    #_test_get_avg()
     #_test_get_ew_rets()
-    # _test_get_ann_ret()
+    _test_get_ann_ret()
 
 
 
