@@ -21,7 +21,11 @@ import pandas as pd
 # package) is imported as "cfg"
 # Note: This module should be imported as cfg
 #
+
 # <COMPLETE THIS PART>
+
+
+
 import config as cfg
 
 
@@ -29,6 +33,7 @@ import config as cfg
 # Part 3: Complete the read_prc_csv function
 # ---------------------------------------------------------------------------- 
 def read_prc_csv(tic):
+
     """ This function creates a data frame with the contents of a CSV file 
     containing stock price information for a given ticker. 
     
@@ -85,9 +90,27 @@ def read_prc_csv(tic):
     # <COMPLETE THIS PART>
 
 
+# Build the file name based on the ticker
+    filename = os.path.join(cfg.DATADIR, f"{tic.lower()}_prc.csv")
+
+    # Read the CSV file into a DataFrame
+    df = pd.read_csv(filename)
+
+    # Convert the 'Date' column to datetime format and set it as the index
+    df['Date'] = pd.to_datetime(df['Date'])
+
+    df.set_index('Date', inplace=True)
 
 
-# ---------------------------------------------------------------------------- 
+    # Standardize column names using the provided function
+    df = cfg.standardise_colnames(df)
+
+
+    return df
+
+read_prc_csv('pg')
+
+# ----------------------------------------------------------------------------
 # Part 4: Complete the mk_prc_df function
 # ---------------------------------------------------------------------------- 
 def mk_prc_df(tickers, prc_col='adj_close'):
@@ -186,20 +209,36 @@ def mk_prc_df(tickers, prc_col='adj_close'):
 
 
     """
-    # <COMPLETE THIS PART>
+    df = pd.DataFrame()
+    #set up an empty data frame that we will add information about each tickers price to
+    for ticker in tickers:
+        ticker_data = read_prc_csv(ticker)
+        #for each ticker, use read_prc_csv to obtain its data
+        ticker_price = ticker_data[prc_col]
+        #Choose which price column
+        df = pd.concat([df, ticker_price.rename(ticker)], axis=1)
+        #add the ticker's chosen price column to the dataframe under the tickers name
+        #print(df)
 
+    df = df.groupby(df.index).first()
+    #Index to date and reorders dates from earliest to latest
+    #print(df)
 
+    return df
 
-
-# ---------------------------------------------------------------------------- 
+#dummy_list = ('tsm','v','pfe')
+#mk_prc_df(dummy_list)
+# ----------------------------------------------------------------------------
 # Part 5: Complete the mk_ret_df function
 # ---------------------------------------------------------------------------- 
 def mk_ret_df(prc_df):
+
     """ Creates a data frame containing returns for both individuals stock AND 
     a proxy for the market portfolio, given a data frame with stock prices, `prc_df`. 
 
     This function will compute returns for each column of `prc_df` and also
     include the market returns in a column called "mkt".  
+    
 
     Market returns need to be obtained from the "mkt" column in the CSV file
     "ff_daily_csv". The location of this CSV file is given by the variable
@@ -261,8 +300,17 @@ def mk_ret_df(prc_df):
 
 
     """
-    # <COMPLETE THIS PART>
+    market_data = pd.read_csv(cfg.FF_CSV)
 
+    market_data['Date'] = pd.to_datetime(market_data['Date'])
+    market_data.set_index('Date', inplace=True)
+
+    returns_df = prc_df.sort_index().pct_change()
+
+    merged_df = pd.merge(returns_df, market_data['mkt'], how='left', left_index=True, right_index=True)
+    merged_df.index.name = 'Date'
+
+    return merged_df
 
 
 
@@ -384,8 +432,10 @@ def get_avg(df, col, year):
         0.032
 
     """
-    #<COMPLETE THIS PART>
 
+    # Row indexing uses the year attribute of DateTimeIndex
+    # mean() ignores NaN values while obtaining the average
+    return df.loc[df.index.year == year, col].mean()
 
 
 def get_ew_rets(df, tickers):
@@ -429,7 +479,11 @@ def get_ew_rets(df, tickers):
 
 
     """
-    #<COMPLETE THIS PART>
+    # Selects columns based on tickers list
+    # For each date, takes an equally-weighted sum in the form of a mean
+    # Ignores NaN values by default, and does nothing when a given date may have all null values.
+    return df.loc[:, tickers].mean(axis=1)
+
 
 
 
@@ -475,8 +529,21 @@ def get_ann_ret(ser, start, end):
       computation of tot_ret
 
     """
-    # <COMPLETE THIS PART>
+    # Selects the rows based on the start and end.
+    stock_returns = ser.loc[start:end]
 
+    # Counts the number of non-null values for N.
+    # Invalidates when series is empty or is all non-null values
+    days = stock_returns.count()
+
+    if days == 0:
+        return 0
+
+    # Total return is calculated by first adding 1 to each row, and then following up with a total product of the rows.
+    # This process ignores NaN values entirely.
+    tot_ret = stock_returns.add(1).prod(skipna=True)
+
+    return tot_ret**(252/days) - 1
 
 # ----------------------------------------------------------------------------
 # Part 8: Answer the following questions
@@ -946,15 +1013,17 @@ def _test_get_ann_ret():
 
 
 if __name__ == "__main__":
-    pass
+
     #_test_cfg()
     #_test_read_prc_csv()
     #_test_mk_prc_df()
     #_test_mk_ret_df()
     _test_mk_aret_df()
     #_test_get_avg()
+    #_test_mk_aret_df()
+    _test_get_avg()
     #_test_get_ew_rets()
-    #_test_get_ann_ret()
+    # _test_get_ann_ret()
 
 
 
